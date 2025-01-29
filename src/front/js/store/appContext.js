@@ -1,39 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import getState from "./flux.js";
 
-// Don't change, here is where we initialize our context, by default it's just going to be null.
+// No cambies esto, es donde inicializamos nuestro contexto, por defecto es null.
 export const Context = React.createContext(null);
 
-// This function injects the global store to any view/component where you want to use it, we will inject the context to layout.js, you can see it here:
-// https://github.com/4GeeksAcademy/react-hello-webapp/blob/master/src/js/layout.js#L35
-const injectContext = PassedComponent => {
-	const StoreWrapper = props => {
-		//this will be passed as the contenxt value
+// Esta función inyecta el store global a cualquier vista/componente donde lo quieras usar
+const injectContext = (PassedComponent) => {
+	const StoreWrapper = (props) => {
+		// Esta es la función que se encarga de manejar el estado global
 		const [state, setState] = useState(
 			getState({
 				getStore: () => state.store,
 				getActions: () => state.actions,
-				setStore: updatedStore =>
+				setStore: (updatedStore) =>
 					setState({
 						store: Object.assign(state.store, updatedStore),
-						actions: { ...state.actions }
-					})
+						actions: { ...state.actions },
+					}),
 			})
 		);
 
 		useEffect(() => {
-			/**
-			 * EDIT THIS!
-			 * This function is the equivalent to "window.onLoad", it only runs once on the entire application lifetime
-			 * you should do your ajax requests or fetch api requests here. Do not use setState() to save data in the
-			 * store, instead use actions, like this:
-			 **/
-			state.actions.getMessage(); // <---- calling this function from the flux.js actions
+			// Aquí puedes hacer cualquier lógica cuando el componente se monta
+			// Ahora puedes llamar la función getMessage que definimos en actions
+			state.actions.getMessage(); // Esto ya debería funcionar
 		}, []);
 
-		// The initial value for the context is not null anymore, but the current state of this component,
-		// the context will now have a getStore, getActions and setStore functions available, because they were declared
-		// on the state of this component
+		// Pasamos el contexto a la vista que lo requiera
 		return (
 			<Context.Provider value={state}>
 				<PassedComponent {...props} />
@@ -44,3 +37,4 @@ const injectContext = PassedComponent => {
 };
 
 export default injectContext;
+

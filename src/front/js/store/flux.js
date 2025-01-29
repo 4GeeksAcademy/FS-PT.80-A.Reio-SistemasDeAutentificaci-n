@@ -1,54 +1,73 @@
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
-			message: null,
-			demo: [
-				{
-					title: "FIRST",
-					background: "white",
-					initial: "white"
-				},
-				{
-					title: "SECOND",
-					background: "white",
-					initial: "white"
-				}
-			]
 		},
 		actions: {
-			// Use getActions to call a function within a fuction
-			exampleFunction: () => {
-				getActions().changeColor(0, "green");
+			getMessage: () => {
+				console.log("Este es el mensaje desde getMessage");
+				return "Este es el mensaje"; //
 			},
 
-			getMessage: async () => {
-				try{
-					// fetching data from the backend
-					const resp = await fetch(process.env.BACKEND_URL + "/api/hello")
-					const data = await resp.json()
-					setStore({ message: data.message })
-					// don't forget to return something, that is how the async resolves
-					return data;
-				}catch(error){
-					console.log("Error loading message from backend", error)
+			register: async (formData) => {
+				try {
+					const resp = await fetch('https://vigilant-space-goggles-4jgr644x6rjx2q77w-3001.app.github.dev/api/register', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify(formData)
+					})
+					if (!resp.ok) throw new Error("Algo ha ido mal!");
+					const data = await resp.json();
+					localStorage.setItem('token', data.token);
+					console.log(data);
+					return true;
+				} catch (error) {
+					console.log(error);
+					return false;
 				}
 			},
-			changeColor: (index, color) => {
-				//get the store
-				const store = getStore();
 
-				//we have to loop the entire demo array to look for the respective index
-				//and change its color
-				const demo = store.demo.map((elm, i) => {
-					if (i === index) elm.background = color;
-					return elm;
-				});
+			login: async (formData) => {
+				try {
+					const resp = await fetch('https://vigilant-space-goggles-4jgr644x6rjx2q77w-3001.app.github.dev/api/login', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify(formData)
+					})
+					if (!resp.ok) throw new Error("Algo ha ido mal!");
+					const data = await resp.json();
+					localStorage.setItem('token', data.token);
+					console.log(data);
+					return true;
+				} catch (error) {
+					console.log(error);
+					return false;
+				}
+			},
 
-				//reset the global store
-				setStore({ demo: demo });
+			checkUser: async () => {
+				try {
+					const resp = await fetch('https://vigilant-space-goggles-4jgr644x6rjx2q77w-3001.app.github.dev', {
+						headers: {
+							'Authorization': `Bearer ${localStorage.getItem('token')}`
+						}
+					})
+					if (!resp.ok) throw new Error('Algo ha ido mal');
+					const data = await resp.json();
+					setStore({ user: data.user });
+					console.log(data);
+					return true;
+				} catch (error) {
+					console.error(error);
+					return false;
+				}
 			}
 		}
 	};
 };
 
 export default getState;
+
